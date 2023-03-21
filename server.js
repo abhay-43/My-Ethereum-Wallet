@@ -9,7 +9,15 @@ app.use(express.static("public"));
 
 app.get("/",function(req,res){
 
+    //sending connect file
     res.sendFile(__dirname + "/connect.html");
+
+})
+
+app.get("/homepage.html",function(req,res){
+    
+    //sending homepage file
+    res.sendFile(__dirname + "/homepage.html");
 
     //API request
     const url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?CMC_PRO_API_KEY=970d4991-d793-4b3b-8eac-5e6871d65a04&symbol=ETH&convert=USDT";
