@@ -1,0 +1,92 @@
+    .btn-circle.btn-xl {
+        width: 100px;
+        height: 100px;
+        padding: 13px 18px;
+        border-radius: 60px;
+        font-size: 15px;
+        text-align: center;
+    }
+    .background{
+        
+        background-image: url('/img/background.jpg');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+    }
+    .logincard{
+        border-style:solid;
+        border-radius:1rem;
+        
+    }
+    .foot{
+        text-align: center;
+        background-color:rgb(63, 62, 62);
+        color: white;
+    }
+    .navbar{
+        background-color: rgb(63, 62, 62);
+        color: white;
+    }
+    .card{
+        background-color: rgb(121, 201, 239);
+        height: 350px;
+        border-color: rgb(129, 19, 232);
+        border-radius: 8px;
+        border-style: solid;
+        border-width: 3px;
+        
+    }
+    .card1{
+        background-color: rgb(240, 240, 235);
+        border-style:solid;
+        border-radius:3rem;
+        border-color: rgb(89, 231, 124);
+
+    }
+    .card2{
+        background-color: beige;
+        border-style:solid;
+        border-radius:3rem;
+        border-color: blue;
+    }
+    .card3{
+        background-color: beige;
+        border-style:solid;
+        border-radius:3rem;
+        border-color:blue;
+    }
+    #amount{
+        text-align: right;
+    }
+    #alert{
+        background-color: rgb(250, 250, 180);
+        margin-top: 2%;
+        border-style: solid;
+        border-width: 0.1px;
+        border-color: red;
+        border-radius: 0.4rem;
+    }
+    .form-control{
+        border-color: black;
+        border-style: solid ;
+    }
+    #logo{
+      text-align: center;
+      font-style: italic;
+      color: rgb(19, 20, 20);
+      margin-top: 2px;
+    }
+    .cpybtn{
+        background-color: green !important;
+        
+    }
+    #LogoName{
+        font-style: normal;
+    }
+    .option{
+        text-align: center;
+    }
+    .top{
+        text-align: center;
+       font-family: cursive;
+    }
