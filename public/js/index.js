@@ -1,4 +1,12 @@
-
+async function getData() {
+  try {
+    const response = await fetch('http://localhost:3000/data');
+    const data = await response.json();
+    console.log(data.price);
+  } catch (error) {
+    console.error(error);
+  }
+}
 
 window.onload = function() {
   //Redirect to homepage on connecting the wallet
@@ -9,6 +17,8 @@ window.onload = function() {
         await provider.send("eth_requestAccounts",[]);
         const signer = provider.getSigner();
         window.location.replace("/homepage.html");
+        console.log(hello);
+        getData();
       }
     }
 
@@ -20,4 +30,7 @@ window.onload = function() {
     })
     
   };
+
+  
+  
   
