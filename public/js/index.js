@@ -28,8 +28,8 @@ window.onload = async function() {
     }
 
     //updating data of ETH
-    getData();
-    setInterval(getData,60000);
+    // getData();
+    // setInterval(getData,60000);
     
     //Redirect to connect page on disconnecting the wallet
     window.ethereum.on('accountsChanged', function (accounts) {
