@@ -37,6 +37,15 @@ app.get("/homepage.html",function(req,res){
             const Volume24H = V24H.toFixed(2); //Volume
             console.log(Price);
 
+            const dataToSend ={
+                price : Price,
+                percentchange24h : PercentChange24H,
+                percentchange7d : PercentChange7D,
+                marketcap : MarketCap,
+                volume : Volume24H
+            };
+            
+
         })
     })
 })
