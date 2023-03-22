@@ -31,9 +31,9 @@ app.get('/data', function(req, res) {
         const PC7D = ETHdata.data.ETH.quote.USDT.percent_change_7d;
         const PercentChange7D = PC7D.toFixed(2); //7D change
         const MC = ETHdata.data.ETH.quote.USDT.market_cap;
-        const MarketCap = MC.toFixed(2); //Market cap
+        const MarketCap = MC.toFixed(0); //Market cap
         const V24H = ETHdata.data.ETH.quote.USDT.volume_24h;
-        const Volume24H = V24H.toFixed(2); //Volume
+        const Volume24H = V24H.toFixed(0); //Volume
   
         // Create a JSON object with the data
         const dataToSend = {
