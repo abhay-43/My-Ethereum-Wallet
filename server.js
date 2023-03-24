@@ -12,7 +12,7 @@ app.get("/",function(req,res){
     res.sendFile(__dirname + "/connect.html");
 })
 
-app.get("/homepage.html",function(req,res){
+app.get("/homepage",function(req,res){
     //sending homepage file
     res.sendFile(__dirname + "/homepage.html");
 })

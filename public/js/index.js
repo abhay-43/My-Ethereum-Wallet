@@ -23,7 +23,9 @@ window.onload = async function() {
       cntBtn.onclick = async function(){
         await provider.send("eth_requestAccounts",[]);
         const signer = provider.getSigner();
-        window.location.replace("/homepage.html");
+        const walletAddress = await signer.getAddress();
+         console.log(walletAddress);
+         window.location.replace("/homepage");
       }
     }
 
