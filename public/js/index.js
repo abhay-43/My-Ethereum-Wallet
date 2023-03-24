@@ -31,21 +31,22 @@ window.onload = async function() {
         const signer = provider.getSigner();
         const walletAddress = await signer.getAddress();
         console.log(walletAddress);
-        localStorage.getItem('redirected',true);
+        localStorage.setItem('redirected',true);
         window.location.replace("/homepage");
       }
     }
 
     //updating data of ETH
-    // if(localStorage.getItem('redirected') === true){
-      getData()
-     setInterval(getData,60000);
-    // }
+     if(localStorage.getItem('redirected') === 'true'){
+      await getData();
+      setInterval(getData,60000);
+     }
     
     //Redirect to connect page on disconnecting the wallet
     window.ethereum.on('accountsChanged', function (accounts) {
         if (accounts.length === 0) {
-            window.location.href = "/";
+           localStorage.removeItem("redirected");
+           window.location.href = "/";
         }
     })
     
