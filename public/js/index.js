@@ -5,10 +5,16 @@ async function getData() {
     const response = await fetch('http://localhost:3000/data');
     const data = await response.json();
     document.getElementById('price').innerHTML =' <b>Price : $</b>'+data.price;
-    document.getElementById('24hc').innerHTML =' <b>24H Change : </b>'+data.percentchange24h+'%';
-    document.getElementById('7dc').innerHTML =' <b>7D change : </b>'+data.percentchange7d+'%';
-    document.getElementById('mc').innerHTML =' <b>Market Cap : $</b>'+data.marketcap;
-    document.getElementById('v').innerHTML =' <b>Volume : $</b>'+data.volume;
+    if(data.percentchange24h >= 0)
+    document.getElementById('24hc').innerHTML =' <b>24H Change : </b> <span style="color: green;">'+data.percentchange24h+'% </span>';
+    else
+    document.getElementById('24hc').innerHTML =' <b>24H Change : </b> <span style="color: red;">'+data.percentchange24h+'% </span>';
+    if(data.percentchange7d >= 0)
+    document.getElementById('7dc').innerHTML =' <b>7D change : </b> <span style="color: green;">'+data.percentchange7d+'% </span>';
+    else
+    document.getElementById('7dc').innerHTML =' <b>7D change : </b> <span style="color: red;">'+data.percentchange7d+'% </span>';
+    document.getElementById('mc').innerHTML =' <b>Market Cap : $</b>'+data.marketcap+"B";
+    document.getElementById('v').innerHTML =' <b>Volume : $</b>'+data.volume+"B";
     
   } catch (error) {
     console.error(error);
@@ -24,14 +30,17 @@ window.onload = async function() {
         await provider.send("eth_requestAccounts",[]);
         const signer = provider.getSigner();
         const walletAddress = await signer.getAddress();
-         console.log(walletAddress);
-         window.location.replace("/homepage");
+        console.log(walletAddress);
+        localStorage.getItem('redirected',true);
+        window.location.replace("/homepage");
       }
     }
 
     //updating data of ETH
-    // getData();
-    // setInterval(getData,60000);
+    // if(localStorage.getItem('redirected') === true){
+      getData()
+     setInterval(getData,60000);
+    // }
     
     //Redirect to connect page on disconnecting the wallet
     window.ethereum.on('accountsChanged', function (accounts) {
