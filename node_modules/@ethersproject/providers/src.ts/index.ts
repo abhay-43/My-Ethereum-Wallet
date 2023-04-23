@@ -20,9 +20,10 @@ import { Network, Networkish } from "@ethersproject/networks";
 import { BaseProvider, EnsProvider, EnsResolver, Resolver } from "./base-provider";
 
 import { AlchemyProvider, AlchemyWebSocketProvider } from "./alchemy-provider";
+import { AnkrProvider } from "./ankr-provider";
 import { CloudflareProvider } from "./cloudflare-provider";
 import { EtherscanProvider } from "./etherscan-provider";
-import { FallbackProvider } from "./fallback-provider";
+import { FallbackProvider, FallbackProviderConfig } from "./fallback-provider";
 import { IpcProvider } from "./ipc-provider";
 import { InfuraProvider, InfuraWebSocketProvider } from "./infura-provider";
 import { JsonRpcProvider, JsonRpcSigner } from "./json-rpc-provider";
@@ -43,7 +44,7 @@ const logger = new Logger(version);
 ////////////////////////
 // Helper Functions
 
-function getDefaultProvider(network?: Network | string, options?: any): BaseProvider {
+function getDefaultProvider(network?: Networkish, options?: any): BaseProvider {
     if (network == null) { network = "homestead"; }
 
     // If passed a URL, figure out the right type of provider based on the scheme
@@ -53,10 +54,10 @@ function getDefaultProvider(network?: Network | string, options?: any): BaseProv
         // Handle http and ws (and their secure variants)
         const match = network.match(/^(ws|http)s?:/i);
         if (match) {
-            switch (match[1]) {
-                case "http":
+            switch (match[1].toLowerCase()) {
+                case "http": case "https":
                     return new JsonRpcProvider(network);
-                case "ws":
+                case "ws": case "wss":
                     return new WebSocketProvider(network);
                 default:
                     logger.throwArgumentError("unsupported URL scheme", "network", network);
@@ -76,6 +77,7 @@ function getDefaultProvider(network?: Network | string, options?: any): BaseProv
         FallbackProvider,
 
         AlchemyProvider,
+        AnkrProvider,
         CloudflareProvider,
         EtherscanProvider,
         InfuraProvider,
@@ -102,12 +104,13 @@ export {
     UrlJsonRpcProvider,
 
     ///////////////////////
-    // Concreate Providers
+    // Concrete Providers
 
     FallbackProvider,
 
     AlchemyProvider,
     AlchemyWebSocketProvider,
+    AnkrProvider,
     CloudflareProvider,
     EtherscanProvider,
     InfuraProvider,
@@ -161,6 +164,8 @@ export {
 
     ExternalProvider,
     JsonRpcFetchFunc,
+
+    FallbackProviderConfig,
 
     Network,
     Networkish,

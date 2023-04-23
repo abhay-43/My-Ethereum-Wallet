@@ -12,8 +12,6 @@ var _version_1 = require("./_version");
 var logger = new logger_1.Logger(_version_1.version);
 var Formatter = /** @class */ (function () {
     function Formatter() {
-        var _newTarget = this.constructor;
-        logger.checkNew(_newTarget, Formatter);
         this.formats = this.getDefaultFormats();
     }
     Formatter.prototype.getDefaultFormats = function () {
@@ -96,7 +94,7 @@ var Formatter = /** @class */ (function () {
             type: type
         };
         formats.block = {
-            hash: hash,
+            hash: Formatter.allowNull(hash),
             parentHash: hash,
             number: number,
             timestamp: number,
@@ -104,12 +102,12 @@ var Formatter = /** @class */ (function () {
             difficulty: this.difficulty.bind(this),
             gasLimit: bigNumber,
             gasUsed: bigNumber,
-            miner: address,
+            miner: Formatter.allowNull(address),
             extraData: data,
             transactions: Formatter.allowNull(Formatter.arrayOf(hash)),
             baseFeePerGas: Formatter.allowNull(bigNumber)
         };
-        formats.blockWithTransactions = properties_1.shallowCopy(formats.block);
+        formats.blockWithTransactions = (0, properties_1.shallowCopy)(formats.block);
         formats.blockWithTransactions.transactions = Formatter.allowNull(Formatter.arrayOf(this.transactionResponse.bind(this)));
         formats.filter = {
             fromBlock: Formatter.allowNull(blockTag, undefined),
@@ -132,7 +130,7 @@ var Formatter = /** @class */ (function () {
         return formats;
     };
     Formatter.prototype.accessList = function (accessList) {
-        return transactions_1.accessListify(accessList || []);
+        return (0, transactions_1.accessListify)(accessList || []);
     };
     // Requires a BigNumberish that is within the IEEE754 safe integer range; returns a number
     // Strict! Used on input.
@@ -173,7 +171,7 @@ var Formatter = /** @class */ (function () {
             if (!strict && value.substring(0, 2) !== "0x") {
                 value = "0x" + value;
             }
-            if (bytes_1.isHexString(value)) {
+            if ((0, bytes_1.isHexString)(value)) {
                 return value.toLowerCase();
             }
         }
@@ -189,17 +187,17 @@ var Formatter = /** @class */ (function () {
     // Requires an address
     // Strict! Used on input.
     Formatter.prototype.address = function (value) {
-        return address_1.getAddress(value);
+        return (0, address_1.getAddress)(value);
     };
     Formatter.prototype.callAddress = function (value) {
-        if (!bytes_1.isHexString(value, 32)) {
+        if (!(0, bytes_1.isHexString)(value, 32)) {
             return null;
         }
-        var address = address_1.getAddress(bytes_1.hexDataSlice(value, 12));
+        var address = (0, address_1.getAddress)((0, bytes_1.hexDataSlice)(value, 12));
         return (address === constants_1.AddressZero) ? null : address;
     };
     Formatter.prototype.contractAddress = function (value) {
-        return address_1.getContractAddress(value);
+        return (0, address_1.getContractAddress)(value);
     };
     // Strict! Used on input.
     Formatter.prototype.blockTag = function (blockTag) {
@@ -209,18 +207,23 @@ var Formatter = /** @class */ (function () {
         if (blockTag === "earliest") {
             return "0x0";
         }
-        if (blockTag === "latest" || blockTag === "pending") {
-            return blockTag;
+        switch (blockTag) {
+            case "earliest": return "0x0";
+            case "latest":
+            case "pending":
+            case "safe":
+            case "finalized":
+                return blockTag;
         }
-        if (typeof (blockTag) === "number" || bytes_1.isHexString(blockTag)) {
-            return bytes_1.hexValue(blockTag);
+        if (typeof (blockTag) === "number" || (0, bytes_1.isHexString)(blockTag)) {
+            return (0, bytes_1.hexValue)(blockTag);
         }
         throw new Error("invalid blockTag");
     };
     // Requires a hash, optionally requires 0x prefix; returns prefixed lowercase hash.
     Formatter.prototype.hash = function (value, strict) {
         var result = this.hex(value, strict);
-        if (bytes_1.hexDataLength(result) !== 32) {
+        if ((0, bytes_1.hexDataLength)(result) !== 32) {
             return logger.throwArgumentError("invalid hash", "value", value);
         }
         return result;
@@ -238,16 +241,20 @@ var Formatter = /** @class */ (function () {
         return null;
     };
     Formatter.prototype.uint256 = function (value) {
-        if (!bytes_1.isHexString(value)) {
+        if (!(0, bytes_1.isHexString)(value)) {
             throw new Error("invalid uint256");
         }
-        return bytes_1.hexZeroPad(value, 32);
+        return (0, bytes_1.hexZeroPad)(value, 32);
     };
     Formatter.prototype._block = function (value, format) {
         if (value.author != null && value.miner == null) {
             value.miner = value.author;
         }
-        return Formatter.check(format, value);
+        // The difficulty may need to come from _difficulty in recursed blocks
+        var difficulty = (value._difficulty != null) ? value._difficulty : value.difficulty;
+        var result = Formatter.check(format, value);
+        result._difficulty = ((difficulty == null) ? null : bignumber_1.BigNumber.from(difficulty));
+        return result;
     };
     Formatter.prototype.block = function (value) {
         return this._block(value, this.formats.block);
@@ -277,13 +284,13 @@ var Formatter = /** @class */ (function () {
         if (transaction.to == null && transaction.creates == null) {
             transaction.creates = this.contractAddress(transaction);
         }
-        if (transaction.type === 1 && transaction.accessList == null) {
+        if ((transaction.type === 1 || transaction.type === 2) && transaction.accessList == null) {
             transaction.accessList = [];
         }
         var result = Formatter.check(this.formats.transaction, transaction);
         if (transaction.chainId != null) {
             var chainId = transaction.chainId;
-            if (bytes_1.isHexString(chainId)) {
+            if ((0, bytes_1.isHexString)(chainId)) {
                 chainId = bignumber_1.BigNumber.from(chainId).toNumber();
             }
             result.chainId = chainId;
@@ -294,7 +301,7 @@ var Formatter = /** @class */ (function () {
             if (chainId == null && result.v == null) {
                 chainId = transaction.chainId;
             }
-            if (bytes_1.isHexString(chainId)) {
+            if ((0, bytes_1.isHexString)(chainId)) {
                 chainId = bignumber_1.BigNumber.from(chainId).toNumber();
             }
             if (typeof (chainId) !== "number" && result.v != null) {
@@ -316,7 +323,7 @@ var Formatter = /** @class */ (function () {
         return result;
     };
     Formatter.prototype.transaction = function (value) {
-        return transactions_1.parse(value);
+        return (0, transactions_1.parse)(value);
     };
     Formatter.prototype.receiptLog = function (value) {
         return Formatter.check(this.formats.receiptLog, value);

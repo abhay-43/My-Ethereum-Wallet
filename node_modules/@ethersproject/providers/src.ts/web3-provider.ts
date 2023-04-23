@@ -30,14 +30,6 @@ function buildWeb3LegacyFetcher(provider: ExternalProvider, sendFunc: Web3Legacy
     const fetcher = "Web3LegacyFetcher";
 
     return function(method: string, params: Array<any>): Promise<any> {
-
-        // Metamask complains about eth_sign (and on some versions hangs)
-        if (method == "eth_sign" && (provider.isMetaMask || provider.isStatus)) {
-            // https://github.com/ethereum/go-ethereum/wiki/Management-APIs#personal_sign
-            method = "personal_sign";
-            params = [ params[1], params[0] ];
-        }
-
         const request = {
             method: method,
             params: params,
@@ -92,13 +84,6 @@ function buildEip1193Fetcher(provider: ExternalProvider): JsonRpcFetchFunc {
     return function(method: string, params: Array<any>): Promise<any> {
         if (params == null) { params = [ ]; }
 
-        // Metamask complains about eth_sign (and on some versions hangs)
-        if (method == "eth_sign" && (provider.isMetaMask || provider.isStatus)) {
-            // https://github.com/ethereum/go-ethereum/wiki/Management-APIs#personal_sign
-            method = "personal_sign";
-            params = [ params[1], params[0] ];
-        }
-
         const request = { method, params };
 
         this.emit("debug", {
@@ -138,8 +123,6 @@ export class Web3Provider extends JsonRpcProvider {
     readonly jsonRpcFetchFunc: JsonRpcFetchFunc;
 
     constructor(provider: ExternalProvider | JsonRpcFetchFunc, network?: Networkish) {
-        logger.checkNew(new.target, Web3Provider);
-
         if (provider == null) {
             logger.throwArgumentError("missing provider", "provider", provider);
         }

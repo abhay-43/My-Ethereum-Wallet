@@ -10,7 +10,6 @@ import { version } from "./_version";
 const logger = new Logger(version);
 export class Formatter {
     constructor() {
-        logger.checkNew(new.target, Formatter);
         this.formats = this.getDefaultFormats();
     }
     getDefaultFormats() {
@@ -92,7 +91,7 @@ export class Formatter {
             type: type
         };
         formats.block = {
-            hash: hash,
+            hash: Formatter.allowNull(hash),
             parentHash: hash,
             number: number,
             timestamp: number,
@@ -100,7 +99,7 @@ export class Formatter {
             difficulty: this.difficulty.bind(this),
             gasLimit: bigNumber,
             gasUsed: bigNumber,
-            miner: address,
+            miner: Formatter.allowNull(address),
             extraData: data,
             transactions: Formatter.allowNull(Formatter.arrayOf(hash)),
             baseFeePerGas: Formatter.allowNull(bigNumber)
@@ -205,8 +204,13 @@ export class Formatter {
         if (blockTag === "earliest") {
             return "0x0";
         }
-        if (blockTag === "latest" || blockTag === "pending") {
-            return blockTag;
+        switch (blockTag) {
+            case "earliest": return "0x0";
+            case "latest":
+            case "pending":
+            case "safe":
+            case "finalized":
+                return blockTag;
         }
         if (typeof (blockTag) === "number" || isHexString(blockTag)) {
             return hexValue(blockTag);
@@ -243,7 +247,11 @@ export class Formatter {
         if (value.author != null && value.miner == null) {
             value.miner = value.author;
         }
-        return Formatter.check(format, value);
+        // The difficulty may need to come from _difficulty in recursed blocks
+        const difficulty = (value._difficulty != null) ? value._difficulty : value.difficulty;
+        const result = Formatter.check(format, value);
+        result._difficulty = ((difficulty == null) ? null : BigNumber.from(difficulty));
+        return result;
     }
     block(value) {
         return this._block(value, this.formats.block);
@@ -273,7 +281,7 @@ export class Formatter {
         if (transaction.to == null && transaction.creates == null) {
             transaction.creates = this.contractAddress(transaction);
         }
-        if (transaction.type === 1 && transaction.accessList == null) {
+        if ((transaction.type === 1 || transaction.type === 2) && transaction.accessList == null) {
             transaction.accessList = [];
         }
         const result = Formatter.check(this.formats.transaction, transaction);

@@ -47,7 +47,6 @@ function checkNames(fragment: Fragment, type: "input" | "output", params: Array<
 */
 export class Interface {
     constructor(fragments) {
-        logger.checkNew(new.target, Interface);
         let abi = [];
         if (typeof (fragments) === "string") {
             abi = JSON.parse(fragments);
@@ -58,7 +57,7 @@ export class Interface {
         defineReadOnly(this, "fragments", abi.map((fragment) => {
             return Fragment.from(fragment);
         }).filter((fragment) => (fragment != null)));
-        defineReadOnly(this, "_abiCoder", getStatic((new.target), "getAbiCoder")());
+        defineReadOnly(this, "_abiCoder", getStatic(new.target, "getAbiCoder")());
         defineReadOnly(this, "functions", {});
         defineReadOnly(this, "errors", {});
         defineReadOnly(this, "events", {});
@@ -155,7 +154,7 @@ export class Interface {
             }
             return this.functions[matching[0]];
         }
-        // Normlize the signature and lookup the function
+        // Normalize the signature and lookup the function
         const result = this.functions[FunctionFragment.fromString(nameOrSignatureOrSighash).format()];
         if (!result) {
             logger.throwArgumentError("no matching function", "signature", nameOrSignatureOrSighash);
@@ -185,7 +184,7 @@ export class Interface {
             }
             return this.events[matching[0]];
         }
-        // Normlize the signature and lookup the function
+        // Normalize the signature and lookup the function
         const result = this.events[EventFragment.fromString(nameOrSignatureOrTopic).format()];
         if (!result) {
             logger.throwArgumentError("no matching event", "signature", nameOrSignatureOrTopic);
@@ -216,7 +215,7 @@ export class Interface {
             }
             return this.errors[matching[0]];
         }
-        // Normlize the signature and lookup the function
+        // Normalize the signature and lookup the function
         const result = this.errors[FunctionFragment.fromString(nameOrSignatureOrSighash).format()];
         if (!result) {
             logger.throwArgumentError("no matching error", "signature", nameOrSignatureOrSighash);
@@ -303,6 +302,7 @@ export class Interface {
         }
         let bytes = arrayify(data);
         let reason = null;
+        let message = "";
         let errorArgs = null;
         let errorName = null;
         let errorSignature = null;
@@ -323,6 +323,12 @@ export class Interface {
                     if (builtin.reason) {
                         reason = errorArgs[0];
                     }
+                    if (errorName === "Error") {
+                        message = `; VM Exception while processing transaction: reverted with reason string ${JSON.stringify(errorArgs[0])}`;
+                    }
+                    else if (errorName === "Panic") {
+                        message = `; VM Exception while processing transaction: reverted with panic code ${errorArgs[0]}`;
+                    }
                 }
                 else {
                     try {
@@ -331,16 +337,14 @@ export class Interface {
                         errorName = error.name;
                         errorSignature = error.format();
                     }
-                    catch (error) {
-                        console.log(error);
-                    }
+                    catch (error) { }
                 }
                 break;
             }
         }
-        return logger.throwError("call revert exception", Logger.errors.CALL_EXCEPTION, {
+        return logger.throwError("call revert exception" + message, Logger.errors.CALL_EXCEPTION, {
             method: functionFragment.format(),
-            errorArgs, errorName, errorSignature, reason
+            data: hexlify(data), errorArgs, errorName, errorSignature, reason
         });
     }
     // Encode the result for a function call (e.g. for eth_call)
@@ -371,6 +375,12 @@ export class Interface {
             }
             else if (param.type === "bytes") {
                 return keccak256(hexlify(value));
+            }
+            if (param.type === "bool" && typeof (value) === "boolean") {
+                value = (value ? "0x01" : "0x00");
+            }
+            if (param.type.match(/^u?int/)) {
+                value = BigNumber.from(value).toHexString();
             }
             // Check addresses are valid
             if (param.type === "address") {
@@ -428,7 +438,7 @@ export class Interface {
                     topics.push(keccak256(value));
                 }
                 else if (param.baseType === "tuple" || param.baseType === "array") {
-                    // @TOOD
+                    // @TODO
                     throw new Error("not implemented");
                 }
                 else {
@@ -511,6 +521,7 @@ export class Interface {
                 // Make error named values throw on access
                 if (value instanceof Error) {
                     Object.defineProperty(result, param.name, {
+                        enumerable: true,
                         get: () => { throw wrapAccessError(`property ${JSON.stringify(param.name)}`, value); }
                     });
                 }
@@ -524,6 +535,7 @@ export class Interface {
             const value = result[i];
             if (value instanceof Error) {
                 Object.defineProperty(result, i, {
+                    enumerable: true,
                     get: () => { throw wrapAccessError(`index ${i}`, value); }
                 });
             }
@@ -557,7 +569,7 @@ export class Interface {
         }
         // @TODO: If anonymous, and the only method, and the input count matches, should we parse?
         //        Probably not, because just because it is the only event in the ABI does
-        //        not mean we have the full ABI; maybe jsut a fragment?
+        //        not mean we have the full ABI; maybe just a fragment?
         return new LogDescription({
             eventFragment: fragment,
             name: fragment.name,

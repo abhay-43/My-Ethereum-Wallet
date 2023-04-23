@@ -105,7 +105,7 @@ export interface FallbackProviderConfig {
     // this provider and if its result comes back before a quorum is reached
     // it will be incorporated into the vote
     // - lower values will cause more network traffic but may result in a
-    //   faster retult.
+    //   faster result.
     stallTimeout?: number;
 
     // How much this provider contributes to the quorum; sometimes a specific
@@ -381,6 +381,9 @@ async function getRunner(config: RunningConfig, currentBlockNumber: number, meth
             if (params.blockTag && isHexString(params.blockTag)) {
                 provider = await waitForSync(config, currentBlockNumber)
             }
+            if (method === "call" && params.blockTag) {
+                return provider[method](params.transaction, params.blockTag);
+            }
             return provider[method](params.transaction);
         case "getTransaction":
         case "getTransactionReceipt":
@@ -410,8 +413,6 @@ export class FallbackProvider extends BaseProvider {
     _highestBlockNumber: number;
 
     constructor(providers: Array<Provider | FallbackProviderConfig>, quorum?: number) {
-        logger.checkNew(new.target, FallbackProvider);
-
         if (providers.length === 0) {
             logger.throwArgumentError("missing providers", "providers", providers);
         }

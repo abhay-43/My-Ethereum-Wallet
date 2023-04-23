@@ -90,8 +90,6 @@ export class Interface {
     readonly _isInterface: boolean;
 
     constructor(fragments: string | ReadonlyArray<Fragment | JsonFragment | string>) {
-        logger.checkNew(new.target, Interface);
-
         let abi: ReadonlyArray<Fragment | JsonFragment | string> = [ ];
         if (typeof(fragments) === "string") {
             abi = JSON.parse(fragments);
@@ -215,7 +213,7 @@ export class Interface {
             return this.functions[matching[0]];
         }
 
-        // Normlize the signature and lookup the function
+        // Normalize the signature and lookup the function
         const result = this.functions[FunctionFragment.fromString(nameOrSignatureOrSighash).format()];
         if (!result) {
             logger.throwArgumentError("no matching function", "signature", nameOrSignatureOrSighash);
@@ -248,7 +246,7 @@ export class Interface {
             return this.events[matching[0]];
         }
 
-        // Normlize the signature and lookup the function
+        // Normalize the signature and lookup the function
         const result = this.events[EventFragment.fromString(nameOrSignatureOrTopic).format()];
         if (!result) {
             logger.throwArgumentError("no matching event", "signature", nameOrSignatureOrTopic);
@@ -282,7 +280,7 @@ export class Interface {
             return this.errors[matching[0]];
         }
 
-        // Normlize the signature and lookup the function
+        // Normalize the signature and lookup the function
         const result = this.errors[FunctionFragment.fromString(nameOrSignatureOrSighash).format()];
         if (!result) {
             logger.throwArgumentError("no matching error", "signature", nameOrSignatureOrSighash);
@@ -390,6 +388,7 @@ export class Interface {
         let bytes = arrayify(data);
 
         let reason: string = null;
+        let message = "";
         let errorArgs: Result = null;
         let errorName: string = null;
         let errorSignature: string = null;
@@ -408,23 +407,26 @@ export class Interface {
                     errorName = builtin.name;
                     errorSignature = builtin.signature;
                     if (builtin.reason) { reason = errorArgs[0]; }
+                    if (errorName === "Error") {
+                        message = `; VM Exception while processing transaction: reverted with reason string ${ JSON.stringify(errorArgs[0]) }`;
+                    } else if (errorName === "Panic") {
+                        message = `; VM Exception while processing transaction: reverted with panic code ${ errorArgs[0] }`;
+                    }
                 } else {
                     try {
                         const error = this.getError(selector);
                         errorArgs = this._abiCoder.decode(error.inputs, bytes.slice(4));
                         errorName = error.name;
                         errorSignature = error.format();
-                    } catch (error) {
-                        console.log(error);
-                    }
+                    } catch (error) { }
                 }
                 break;
             }
         }
 
-        return logger.throwError("call revert exception", Logger.errors.CALL_EXCEPTION, {
+        return logger.throwError("call revert exception" + message, Logger.errors.CALL_EXCEPTION, {
             method: functionFragment.format(),
-            errorArgs, errorName, errorSignature, reason
+            data: hexlify(data), errorArgs, errorName, errorSignature, reason
         });
     }
 
@@ -438,7 +440,7 @@ export class Interface {
     }
 
     // Create the filter for the event with search criteria (e.g. for eth_filterLog)
-    encodeFilterTopics(eventFragment: EventFragment, values: ReadonlyArray<any>): Array<string | Array<string>> {
+    encodeFilterTopics(eventFragment: EventFragment | string, values: ReadonlyArray<any>): Array<string | Array<string>> {
         if (typeof(eventFragment) === "string") {
             eventFragment = this.getEvent(eventFragment);
         }
@@ -460,6 +462,14 @@ export class Interface {
                  return keccak256(hexlify(value));
             }
 
+            if (param.type === "bool" && typeof(value) === "boolean") {
+                value = (value ? "0x01": "0x00");
+            }
+
+            if (param.type.match(/^u?int/)) {
+                value = BigNumber.from(value).toHexString();
+            }
+
             // Check addresses are valid
             if (param.type === "address") { this._abiCoder.encode( [ "address" ], [ value ]); }
             return hexZeroPad(hexlify(value), 32);
@@ -467,7 +477,7 @@ export class Interface {
 
         values.forEach((value, index) => {
 
-            let param = eventFragment.inputs[index];
+            let param = (<EventFragment>eventFragment).inputs[index];
 
             if (!param.indexed) {
                 if (value != null) {
@@ -495,7 +505,7 @@ export class Interface {
         return topics;
     }
 
-    encodeEventLog(eventFragment: EventFragment, values: ReadonlyArray<any>): { data: string, topics: Array<string> } {
+    encodeEventLog(eventFragment: EventFragment | string, values: ReadonlyArray<any>): { data: string, topics: Array<string> } {
         if (typeof(eventFragment) === "string") {
             eventFragment = this.getEvent(eventFragment);
         }
@@ -521,7 +531,7 @@ export class Interface {
                 } else if (param.type === "bytes") {
                     topics.push(keccak256(value))
                 } else if (param.baseType === "tuple" || param.baseType === "array") {
-                    // @TOOD
+                    // @TODO
                     throw new Error("not implemented");
                 } else {
                     topics.push(this._abiCoder.encode([ param.type] , [ value ]));
@@ -606,6 +616,7 @@ export class Interface {
                 // Make error named values throw on access
                 if (value instanceof Error) {
                     Object.defineProperty(result, param.name, {
+                        enumerable: true,
                         get: () => { throw wrapAccessError(`property ${ JSON.stringify(param.name) }`, value); }
                     });
                 } else {
@@ -619,6 +630,7 @@ export class Interface {
             const value = result[i];
             if (value instanceof Error) {
                 Object.defineProperty(result, i, {
+                    enumerable: true,
                     get: () => { throw wrapAccessError(`index ${ i }`, value); }
                 });
             }
@@ -656,7 +668,7 @@ export class Interface {
 
         // @TODO: If anonymous, and the only method, and the input count matches, should we parse?
         //        Probably not, because just because it is the only event in the ABI does
-        //        not mean we have the full ABI; maybe jsut a fragment?
+        //        not mean we have the full ABI; maybe just a fragment?
 
 
        return new LogDescription({

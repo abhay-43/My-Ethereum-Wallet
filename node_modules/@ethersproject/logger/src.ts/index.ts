@@ -123,7 +123,7 @@ export enum ErrorCode {
     //  - reason: The reason (only for EIP848 "Error(string)")
     CALL_EXCEPTION = "CALL_EXCEPTION",
 
-    // Insufficien funds (< value + gasLimit * gasPrice)
+    // Insufficient funds (< value + gasLimit * gasPrice)
     //   - transaction: the transaction attempted
     INSUFFICIENT_FUNDS = "INSUFFICIENT_FUNDS",
 
@@ -146,7 +146,17 @@ export enum ErrorCode {
     //   - replacement: the full TransactionsResponse for the replacement
     //   - receipt: the receipt of the replacement
     TRANSACTION_REPLACED = "TRANSACTION_REPLACED",
+
+
+    ///////////////////
+    // Interaction Errors
+
+    // The user rejected the action, such as signing a message or sending
+    // a transaction
+    ACTION_REJECTED = "ACTION_REJECTED",
 };
+
+const HEX = "0123456789abcdef";
 
 export class Logger {
     readonly version: string;
@@ -195,8 +205,18 @@ export class Logger {
 
         const messageDetails: Array<string> = [];
         Object.keys(params).forEach((key) => {
+            const value = params[key];
             try {
-                messageDetails.push(key + "=" + JSON.stringify(params[key]));
+                if (value instanceof Uint8Array) {
+                    let hex = "";
+                    for (let i = 0; i < value.length; i++) {
+                      hex += HEX[value[i] >> 4];
+                      hex += HEX[value[i] & 0x0f];
+                    }
+                    messageDetails.push(key + "=Uint8Array(0x" + hex + ")");
+                } else {
+                    messageDetails.push(key + "=" + JSON.stringify(value));
+                }
             } catch (error) {
                 messageDetails.push(key + "=" + JSON.stringify(params[key].toString()));
             }
@@ -205,6 +225,42 @@ export class Logger {
         messageDetails.push(`version=${ this.version }`);
 
         const reason = message;
+
+        let url = "";
+
+        switch (code) {
+            case ErrorCode.NUMERIC_FAULT: {
+                url = "NUMERIC_FAULT";
+                const fault = message;
+
+                switch (fault) {
+                    case "overflow": case "underflow": case "division-by-zero":
+                        url += "-" + fault;
+                        break;
+                    case "negative-power": case "negative-width":
+                        url += "-unsupported";
+                        break;
+                    case "unbound-bitwise-result":
+                        url += "-unbound-result";
+                        break;
+                }
+                break;
+            }
+            case ErrorCode.CALL_EXCEPTION:
+            case ErrorCode.INSUFFICIENT_FUNDS:
+            case ErrorCode.MISSING_NEW:
+            case ErrorCode.NONCE_EXPIRED:
+            case ErrorCode.REPLACEMENT_UNDERPRICED:
+            case ErrorCode.TRANSACTION_REPLACED:
+            case ErrorCode.UNPREDICTABLE_GAS_LIMIT:
+                url = code;
+                break;
+        }
+
+        if (url) {
+            message += " [ See: https:/\/links.ethers.org/v5-errors-" + url + " ]";
+        }
+
         if (messageDetails.length) {
             message += " (" + messageDetails.join(", ") + ")";
         }

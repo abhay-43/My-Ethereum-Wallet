@@ -97,8 +97,6 @@ export class HDNode implements ExternallyOwnedAccount {
      *   - fromSeed
      */
     constructor(constructorGuard: any, privateKey: string, publicKey: string, parentFingerprint: string, chainCode: string, index: number, depth: number, mnemonicOrPath: Mnemonic | string) {
-        logger.checkNew(new.target, HDNode);
-
         /* istanbul ignore if */
         if (constructorGuard !== _constructorGuard) {
             throw new Error("HDNode constructor cannot be called directly");
@@ -142,7 +140,7 @@ export class HDNode implements ExternallyOwnedAccount {
 
     get extendedKey(): string {
         // We only support the mainnet values for now, but if anyone needs
-        // testnet values, let me know. I believe current senitment is that
+        // testnet values, let me know. I believe current sentiment is that
         // we should always use mainnet, and use BIP-44 to derive the network
         //   - Mainnet: public=0x0488B21E, private=0x0488ADE4
         //   - Testnet: public=0x043587CF, private=0x04358394

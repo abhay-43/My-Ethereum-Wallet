@@ -270,7 +270,7 @@ function _serialize(transaction: UnsignedTransaction, signature?: SignatureLike)
         raw.push("0x");
     }
 
-    // Requesting an unsigned transation
+    // Requesting an unsigned transaction
     if (!signature) {
         return RLP.encode(raw);
     }
@@ -342,9 +342,7 @@ function _parseEipSignature(tx: Transaction, fields: Array<string>, serialize: (
     try {
         const digest = keccak256(serialize(tx));
         tx.from = recoverAddress(digest, { r: tx.r, s: tx.s, recoveryParam: tx.v });
-    } catch (error) {
-        console.log(error);
-    }
+    } catch (error) { }
 }
 
 function _parseEip1559(payload: Uint8Array): Transaction {
@@ -434,7 +432,7 @@ function _parse(rawTransaction: Uint8Array): Transaction {
         tx.v = BigNumber.from(transaction[6]).toNumber();
 
     } catch (error) {
-        console.log(error);
+        // @TODO: What makes snese to do? The v is too big
         return tx;
     }
 
@@ -447,7 +445,7 @@ function _parse(rawTransaction: Uint8Array): Transaction {
         tx.v = 0;
 
     } else {
-        // Signed Tranasaction
+        // Signed Transaction
 
         tx.chainId = Math.floor((tx.v - 35) / 2);
         if (tx.chainId < 0) { tx.chainId = 0; }
@@ -466,9 +464,7 @@ function _parse(rawTransaction: Uint8Array): Transaction {
         const digest = keccak256(RLP.encode(raw));
         try {
             tx.from = recoverAddress(digest, { r: hexlify(tx.r), s: hexlify(tx.s), recoveryParam: recoveryParam });
-        } catch (error) {
-            console.log(error);
-        }
+        } catch (error) { }
 
         tx.hash = keccak256(rawTransaction);
     }

@@ -67,7 +67,7 @@ var logger = new logger_1.Logger(_version_1.version);
  *  will stall responses to ensure a consistent state, while this
  *  WebSocket provider assumes the connected backend will manage this.
  *
- *  For example, if a polling provider emits an event which indicats
+ *  For example, if a polling provider emits an event which indicates
  *  the event occurred in blockhash XXX, a call to fetch that block by
  *  its hash XXX, if not present will retry until it is present. This
  *  can occur when querying a pool of nodes that are mildly out of sync
@@ -86,22 +86,32 @@ var WebSocketProvider = /** @class */ (function (_super) {
                 operation: "network:any"
             });
         }
-        _this = _super.call(this, url, network) || this;
+        if (typeof (url) === "string") {
+            _this = _super.call(this, url, network) || this;
+        }
+        else {
+            _this = _super.call(this, "_websocket", network) || this;
+        }
         _this._pollingInterval = -1;
         _this._wsReady = false;
-        properties_1.defineReadOnly(_this, "_websocket", new ws_1.WebSocket(_this.connection.url));
-        properties_1.defineReadOnly(_this, "_requests", {});
-        properties_1.defineReadOnly(_this, "_subs", {});
-        properties_1.defineReadOnly(_this, "_subIds", {});
-        properties_1.defineReadOnly(_this, "_detectNetwork", _super.prototype.detectNetwork.call(_this));
+        if (typeof (url) === "string") {
+            (0, properties_1.defineReadOnly)(_this, "_websocket", new ws_1.WebSocket(_this.connection.url));
+        }
+        else {
+            (0, properties_1.defineReadOnly)(_this, "_websocket", url);
+        }
+        (0, properties_1.defineReadOnly)(_this, "_requests", {});
+        (0, properties_1.defineReadOnly)(_this, "_subs", {});
+        (0, properties_1.defineReadOnly)(_this, "_subIds", {});
+        (0, properties_1.defineReadOnly)(_this, "_detectNetwork", _super.prototype.detectNetwork.call(_this));
         // Stall sending requests until the socket is open...
-        _this._websocket.onopen = function () {
+        _this.websocket.onopen = function () {
             _this._wsReady = true;
             Object.keys(_this._requests).forEach(function (id) {
-                _this._websocket.send(_this._requests[id].payload);
+                _this.websocket.send(_this._requests[id].payload);
             });
         };
-        _this._websocket.onmessage = function (messageEvent) {
+        _this.websocket.onmessage = function (messageEvent) {
             var data = messageEvent.data;
             var result = JSON.parse(data);
             if (result.id != null) {
@@ -121,8 +131,8 @@ var WebSocketProvider = /** @class */ (function (_super) {
                     var error = null;
                     if (result.error) {
                         error = new Error(result.error.message || "unknown error");
-                        properties_1.defineReadOnly(error, "code", result.error.code || null);
-                        properties_1.defineReadOnly(error, "response", data);
+                        (0, properties_1.defineReadOnly)(error, "code", result.error.code || null);
+                        (0, properties_1.defineReadOnly)(error, "response", data);
                     }
                     else {
                         error = new Error("unknown error");
@@ -159,6 +169,13 @@ var WebSocketProvider = /** @class */ (function (_super) {
         }
         return _this;
     }
+    Object.defineProperty(WebSocketProvider.prototype, "websocket", {
+        // Cannot narrow the type of _websocket, as that is not backwards compatible
+        // so we add a getter and let the WebSocket be a public API.
+        get: function () { return this._websocket; },
+        enumerable: false,
+        configurable: true
+    });
     WebSocketProvider.prototype.detectNetwork = function () {
         return this._detectNetwork;
     };
@@ -221,7 +238,7 @@ var WebSocketProvider = /** @class */ (function (_super) {
             });
             _this._requests[String(rid)] = { callback: callback, payload: payload };
             if (_this._wsReady) {
-                _this._websocket.send(payload);
+                _this.websocket.send(payload);
             }
         });
     };
@@ -340,12 +357,12 @@ var WebSocketProvider = /** @class */ (function (_super) {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!(this._websocket.readyState === ws_1.WebSocket.CONNECTING)) return [3 /*break*/, 2];
+                        if (!(this.websocket.readyState === ws_1.WebSocket.CONNECTING)) return [3 /*break*/, 2];
                         return [4 /*yield*/, (new Promise(function (resolve) {
-                                _this._websocket.onopen = function () {
+                                _this.websocket.onopen = function () {
                                     resolve(true);
                                 };
-                                _this._websocket.onerror = function () {
+                                _this.websocket.onerror = function () {
                                     resolve(false);
                                 };
                             }))];
@@ -355,7 +372,7 @@ var WebSocketProvider = /** @class */ (function (_super) {
                     case 2:
                         // Hangup
                         // See: https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent#Status_codes
-                        this._websocket.close(1000);
+                        this.websocket.close(1000);
                         return [2 /*return*/];
                 }
             });

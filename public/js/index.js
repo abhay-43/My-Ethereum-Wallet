@@ -29,7 +29,18 @@ window.onload = async function() {
       cntBtn.onclick = async function(){
         await provider.send("eth_requestAccounts",[]);
         const signer = provider.getSigner();
-        const walletAddress = await signer.getAddress();
+        const data = {
+          provider : provider,
+          signer : signer
+        }
+        // const walletAddress = await signer.getAddress();
+        const response = await fetch("http://localhost:3000/user",{
+        method : 'POST',
+        headers: {
+        'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+        });
         console.log(walletAddress);
         localStorage.setItem('redirected',true);
         window.location.replace("/homepage");

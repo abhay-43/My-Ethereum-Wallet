@@ -40,7 +40,7 @@ exports.getUrl = void 0;
 var bytes_1 = require("@ethersproject/bytes");
 function getUrl(href, options) {
     return __awaiter(this, void 0, void 0, function () {
-        var request, response, body, headers;
+        var request, opts, response, body, headers;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -51,12 +51,33 @@ function getUrl(href, options) {
                         method: (options.method || "GET"),
                         headers: (options.headers || {}),
                         body: (options.body || undefined),
-                        mode: "cors",
-                        cache: "no-cache",
-                        credentials: "same-origin",
-                        redirect: "follow",
-                        referrer: "client", // no-referrer, *client
                     };
+                    if (options.skipFetchSetup !== true) {
+                        request.mode = "cors"; // no-cors, cors, *same-origin
+                        request.cache = "no-cache"; // *default, no-cache, reload, force-cache, only-if-cached
+                        request.credentials = "same-origin"; // include, *same-origin, omit
+                        request.redirect = "follow"; // manual, *follow, error
+                        request.referrer = "client"; // no-referrer, *client
+                    }
+                    ;
+                    if (options.fetchOptions != null) {
+                        opts = options.fetchOptions;
+                        if (opts.mode) {
+                            request.mode = (opts.mode);
+                        }
+                        if (opts.cache) {
+                            request.cache = (opts.cache);
+                        }
+                        if (opts.credentials) {
+                            request.credentials = (opts.credentials);
+                        }
+                        if (opts.redirect) {
+                            request.redirect = (opts.redirect);
+                        }
+                        if (opts.referrer) {
+                            request.referrer = opts.referrer;
+                        }
+                    }
                     return [4 /*yield*/, fetch(href, request)];
                 case 1:
                     response = _a.sent();
@@ -78,7 +99,7 @@ function getUrl(href, options) {
                             headers: headers,
                             statusCode: response.status,
                             statusMessage: response.statusText,
-                            body: bytes_1.arrayify(new Uint8Array(body)),
+                            body: (0, bytes_1.arrayify)(new Uint8Array(body)),
                         }];
             }
         });

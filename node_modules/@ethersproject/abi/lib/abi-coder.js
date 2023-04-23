@@ -22,9 +22,7 @@ var paramTypeBytes = new RegExp(/^bytes([0-9]*)$/);
 var paramTypeNumber = new RegExp(/^(u?int)([0-9]*)$/);
 var AbiCoder = /** @class */ (function () {
     function AbiCoder(coerceFunc) {
-        var _newTarget = this.constructor;
-        logger.checkNew(_newTarget, AbiCoder);
-        properties_1.defineReadOnly(this, "coerceFunc", coerceFunc || null);
+        (0, properties_1.defineReadOnly)(this, "coerceFunc", coerceFunc || null);
     }
     AbiCoder.prototype._getCoder = function (param) {
         var _this = this;
@@ -97,7 +95,7 @@ var AbiCoder = /** @class */ (function () {
         var _this = this;
         var coders = types.map(function (type) { return _this._getCoder(fragments_1.ParamType.from(type)); });
         var coder = new tuple_1.TupleCoder(coders, "_");
-        return coder.decode(this._getReader(bytes_1.arrayify(data), loose));
+        return coder.decode(this._getReader((0, bytes_1.arrayify)(data), loose));
     };
     return AbiCoder;
 }());

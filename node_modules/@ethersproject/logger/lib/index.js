@@ -97,7 +97,7 @@ var ErrorCode;
     //  - errorArgs?: The EIP848 error parameters
     //  - reason: The reason (only for EIP848 "Error(string)")
     ErrorCode["CALL_EXCEPTION"] = "CALL_EXCEPTION";
-    // Insufficien funds (< value + gasLimit * gasPrice)
+    // Insufficient funds (< value + gasLimit * gasPrice)
     //   - transaction: the transaction attempted
     ErrorCode["INSUFFICIENT_FUNDS"] = "INSUFFICIENT_FUNDS";
     // Nonce has already been used
@@ -116,8 +116,14 @@ var ErrorCode;
     //   - replacement: the full TransactionsResponse for the replacement
     //   - receipt: the receipt of the replacement
     ErrorCode["TRANSACTION_REPLACED"] = "TRANSACTION_REPLACED";
+    ///////////////////
+    // Interaction Errors
+    // The user rejected the action, such as signing a message or sending
+    // a transaction
+    ErrorCode["ACTION_REJECTED"] = "ACTION_REJECTED";
 })(ErrorCode = exports.ErrorCode || (exports.ErrorCode = {}));
 ;
+var HEX = "0123456789abcdef";
 var Logger = /** @class */ (function () {
     function Logger(version) {
         Object.defineProperty(this, "version", {
@@ -170,8 +176,19 @@ var Logger = /** @class */ (function () {
         }
         var messageDetails = [];
         Object.keys(params).forEach(function (key) {
+            var value = params[key];
             try {
-                messageDetails.push(key + "=" + JSON.stringify(params[key]));
+                if (value instanceof Uint8Array) {
+                    var hex = "";
+                    for (var i = 0; i < value.length; i++) {
+                        hex += HEX[value[i] >> 4];
+                        hex += HEX[value[i] & 0x0f];
+                    }
+                    messageDetails.push(key + "=Uint8Array(0x" + hex + ")");
+                }
+                else {
+                    messageDetails.push(key + "=" + JSON.stringify(value));
+                }
             }
             catch (error) {
                 messageDetails.push(key + "=" + JSON.stringify(params[key].toString()));
@@ -180,6 +197,40 @@ var Logger = /** @class */ (function () {
         messageDetails.push("code=" + code);
         messageDetails.push("version=" + this.version);
         var reason = message;
+        var url = "";
+        switch (code) {
+            case ErrorCode.NUMERIC_FAULT: {
+                url = "NUMERIC_FAULT";
+                var fault = message;
+                switch (fault) {
+                    case "overflow":
+                    case "underflow":
+                    case "division-by-zero":
+                        url += "-" + fault;
+                        break;
+                    case "negative-power":
+                    case "negative-width":
+                        url += "-unsupported";
+                        break;
+                    case "unbound-bitwise-result":
+                        url += "-unbound-result";
+                        break;
+                }
+                break;
+            }
+            case ErrorCode.CALL_EXCEPTION:
+            case ErrorCode.INSUFFICIENT_FUNDS:
+            case ErrorCode.MISSING_NEW:
+            case ErrorCode.NONCE_EXPIRED:
+            case ErrorCode.REPLACEMENT_UNDERPRICED:
+            case ErrorCode.TRANSACTION_REPLACED:
+            case ErrorCode.UNPREDICTABLE_GAS_LIMIT:
+                url = code;
+                break;
+        }
+        if (url) {
+            message += " [ See: https:/\/links.ethers.org/v5-errors-" + url + " ]";
+        }
         if (messageDetails.length) {
             message += " (" + messageDetails.join(", ") + ")";
         }
