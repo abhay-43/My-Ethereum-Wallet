@@ -2,15 +2,16 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const https = require("https");
-const { ethers } = require("ethers");
+// const { ethers } = require("ethers");
 
 const {KEY} = require('./config.js');
 const { dirname } = require("path");
 const app = express();
-let provider;
-let signer;
+let user;
 
 app.use(express.static("public"));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 app.get("/",function(req,res){
     //sending connect file
@@ -19,10 +20,13 @@ app.get("/",function(req,res){
 
 app.get("/homepage",function(req,res){
     //sending homepage file
-})
-app.post('/user',function(req,res){
-  provider = req.body.provider;
-  signer = req.body.signer;
+    res.sendFile(__dirname + "/homepage.html");
+
+  })
+  app.post('/user',function(req,res){
+    user = req.body.wallet;
+    console.log("User : " +user);
+    res.send("ok");
 });
 
 app.get('/data', function(req, res) {
@@ -67,10 +71,10 @@ app.get('/data', function(req, res) {
   // });
 
   //create wallet function
-  function CreateWallet(){
-    const wallet = ethers.Wallet.createRandom();
-    return wallet;
-  }
+  // function CreateWallet(){
+  //   const wallet = ethers.Wallet.createRandom();
+  //   return wallet;
+  // }
 
 app.listen(3000,function(){
     console.log("server started !!");

@@ -29,21 +29,21 @@ window.onload = async function() {
       cntBtn.onclick = async function(){
         await provider.send("eth_requestAccounts",[]);
         const signer = provider.getSigner();
-        const data = {
-          provider : provider,
-          signer : signer
-        }
-        // const walletAddress = await signer.getAddress();
-        const response = await fetch("http://localhost:3000/user",{
-        method : 'POST',
-        headers: {
-        'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-        });
+        const walletAddress = await signer.getAddress();
         console.log(walletAddress);
+        const data = {
+          wallet : walletAddress
+        }
         localStorage.setItem('redirected',true);
-        window.location.replace("/homepage");
+        const response = await fetch("http://localhost:3000/user",{
+            method : 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+          });
+            await response.text();
+            window.location.replace("/homepage");
       }
     }
 
