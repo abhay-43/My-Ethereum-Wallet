@@ -2,16 +2,29 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const https = require("https");
+const mongoose = require('mongoose');
+
 // const { ethers } = require("ethers");
 
 const {KEY} = require('./config.js');
-const { dirname } = require("path");
+const { MONGO_URL } = require("./config.js");
+const { user } = require("./config.js");
 const app = express();
-let user;
 
 app.use(express.static("public"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+//connect to database
+async function ConnectDB(){
+  try{
+    await mongoose.connect(MONGO_URL);
+    console.log("Database in connected...");
+  }catch(error){
+    console.log("Error while connecting database...");
+  }
+}
+ConnectDB();
 
 app.get("/",function(req,res){
     //sending connect file
