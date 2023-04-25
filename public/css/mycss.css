@@ -24,13 +24,13 @@
         color: white;
     }
     .navbar{
-        background-color: rgb(37, 47, 85);
+        background-color: rgb(61, 66, 83);
         color: white;
     }
     .card{
         background-color: rgb(255, 255, 255);
         height: 350px;
-        border-color: rgb(129, 19, 232);
+        border-color: rgb(2, 0, 4);
         border-radius: 8px;
         border-style: solid;
         border-width: 3px;

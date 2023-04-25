@@ -37,7 +37,7 @@ app.get("/homepage",function(req,res){
 
   })
   app.post('/user',function(req,res){
-    user = req.body.wallet;
+    const account = req.body.wallet;
     console.log("User : " +user);
     res.send("ok");
 });

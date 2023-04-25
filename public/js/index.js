@@ -21,6 +21,7 @@ async function getData() {
   }
 }
 
+
 window.onload = async function() {
   //Redirect to homepage on connecting the wallet
     const provider = new ethers.providers.Web3Provider(window.ethereum);
