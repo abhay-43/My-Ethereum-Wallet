@@ -48,6 +48,10 @@ window.onload = async function() {
       }
     }
 
+    document.getElementById('disCntBtn').onclick = function (){
+      alert('You can manually disconnect your wallet !\n\nFollow steps :\n\n Open metamask -> Tap "connected" -> Tap three dots (⋮) \n  -> Tap "Disconnect this account"');
+    } 
+
     //updating data of ETH
      if(localStorage.getItem('redirected') === 'true'){
       await getData();

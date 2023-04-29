@@ -4,9 +4,9 @@ const bodyParser = require("body-parser");
 const https = require("https");
 const mongoose = require('mongoose');
 
-// const { ethers } = require("ethers");
+const { ethers } = require("ethers"); 
 
-const {KEY} = require('./config.js');
+const {API_URL} = require('./config.js');
 const { MONGO_URL } = require("./config.js");
 const { user } = require("./config.js");
 const app = express();
@@ -36,15 +36,26 @@ app.get("/homepage",function(req,res){
     res.sendFile(__dirname + "/homepage.html");
 
   })
-  app.post('/user',function(req,res){
+  app.post('/user',async function(req,res){
     const account = req.body.wallet;
-    console.log("User : " +user);
+    console.log("User : " +account);
+    const present = await ValidateUser(account);
+    if(present == null){
+      const mew_id = CreateWallet();
+      const newUser = new user({
+        wallet : account,
+        mew_id : mew_id.address,
+        txn1 : "",
+        txn2 : ""
+      });
+      const update = await newUser.save();
+    }
     res.send("ok");
 });
 
 app.get('/data', function(req, res) {
     // API request
-    const url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?CMC_PRO_API_KEY="+KEY+"&symbol=ETH&convert=USDT";
+    const url = API_URL;
     https.get(url, function(response){
       response.on('data', function(data){
   
@@ -84,10 +95,16 @@ app.get('/data', function(req, res) {
   // });
 
   //create wallet function
-  // function CreateWallet(){
-  //   const wallet = ethers.Wallet.createRandom();
-  //   return wallet;
-  // }
+  function CreateWallet(){
+    const wallet = ethers.Wallet.createRandom();
+    return wallet;
+  }
+
+  //check user exist or not ?
+  async function ValidateUser(address){
+    const present = await user.findOne({wallet : address});
+    return present;
+  }
 
 app.listen(3000,function(){
     console.log("server started !!");
