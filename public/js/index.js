@@ -1,9 +1,18 @@
 
+
+const provider = new ethers.providers.Web3Provider(window.ethereum);
+const signer = provider.getSigner();
+let currPrice;
+
+
+
+
 //fetching json from server
 async function getData() {
   try {
     const response = await fetch('http://localhost:3000/data');
     const data = await response.json();
+    currPrice = data.price;
     document.getElementById('price').innerHTML =' <b>Price : $</b>'+data.price;
     if(data.percentchange24h >= 0)
     document.getElementById('24hc').innerHTML =' <b>24H Change : </b> <span style="color: green;">'+data.percentchange24h+'% </span>';
@@ -32,15 +41,29 @@ async function getMew_ID() {
     }
 }
 
+//updating balance
+async function UpdateBalance(){
+  try{
+    const response = await fetch('http://localhost:3000/mew_id');
+    const data = await response.json();
+    const balance = await provider.getBalance(data.add);
+    const EtherBalance = ethers.utils.formatEther(balance);
+    const ETHinUSD = EtherBalance * currPrice;
+    document.getElementById('balance').innerHTML = EtherBalance+' ETH ≈ $'+ETHinUSD;
+  }catch(error){
+    console.log(error);
+  }
+}
+
 window.onload = async function() {
 
   //Redirect to homepage on connecting the wallet
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    // const provider = new ethers.providers.Web3Provider(window.ethereum);
     const cntBtn = document.getElementById('CntBtn');
     if (cntBtn) {
       cntBtn.onclick = async function(){
         await provider.send("eth_requestAccounts",[]);
-        const signer = provider.getSigner();
+        // const signer = provider.getSigner();
         const walletAddress = await signer.getAddress();
         console.log(walletAddress);
         const data = {
@@ -68,6 +91,7 @@ window.onload = async function() {
      if(localStorage.getItem('redirected') === 'true'){
       await getMew_ID();
       await getData();
+      await UpdateBalance()
       setInterval(getData,60000);
      }
     

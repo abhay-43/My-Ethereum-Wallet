@@ -56,7 +56,7 @@ app.get("/homepage",function(req,res){
           val : 0.00
         }
       });
-      const update = await newUser.save();
+       present = await newUser.save();
     }
     Mew_ID = {
       add : present.mew_id
