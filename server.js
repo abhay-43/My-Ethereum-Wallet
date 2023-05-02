@@ -36,6 +36,8 @@ app.get("/homepage",function(req,res){
     res.sendFile(__dirname + "/homepage.html");
 
   })
+
+  let Mew_ID;
   app.post('/user',async function(req,res){
     const account = req.body.wallet;
     console.log("User : " +account);
@@ -45,10 +47,19 @@ app.get("/homepage",function(req,res){
       const newUser = new user({
         wallet : account,
         mew_id : mew_id.address,
-        txn1 : "",
-        txn2 : ""
+        txn1 : {
+          add : "",
+          val : 0.00
+        },
+        txn2 : {
+          add : "",
+          val : 0.00
+        }
       });
       const update = await newUser.save();
+    }
+    Mew_ID = {
+      add : present.mew_id
     }
     res.send("ok");
 });
@@ -88,11 +99,11 @@ app.get('/data', function(req, res) {
     });
   });
 
-  // app.get('/connect',async function(req,res){
-  //   const ConnectedWallet = await Connect();
-  //   console.log(ConnectedWallet);
-  //   res.sendFile(__dirname + "/homepage.html");
-  // });
+  app.get('/mew_id',function(req,res){
+   res.setHeader('Content-Type','application/json');
+   res.send(Mew_ID);
+   console.log(Mew_ID);
+  });
 
   //create wallet function
   function CreateWallet(){

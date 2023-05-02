@@ -21,8 +21,19 @@ async function getData() {
   }
 }
 
+//fetching wallet address from database
+async function getMew_ID() {
+  try{
+    const response = await fetch('http://localhost:3000/mew_id');
+    const data = await response.json();
+    document.getElementById('myaddress').value = data.add;
+    }catch(error){
+      console.log(error);
+    }
+}
 
 window.onload = async function() {
+
   //Redirect to homepage on connecting the wallet
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const cntBtn = document.getElementById('CntBtn');
@@ -55,6 +66,7 @@ window.onload = async function() {
 
     //updating data of ETH
      if(localStorage.getItem('redirected') === 'true'){
+      await getMew_ID();
       await getData();
       setInterval(getData,60000);
      }
@@ -67,6 +79,19 @@ window.onload = async function() {
         }
     })
     
+    
+    // Copy to clipboard
+    document.getElementById('CopyButton').onclick = function () {
+	    var text = document.getElementById('myaddress');
+	    navigator.clipboard.writeText(text.value).then(function () {
+	    let button = document.getElementById('CopyButton')
+	    button.classList.add('cpybtn');
+	    button.innerHTML = "copied!";
+	    setTimeout(function () { button.classList.remove('cpybtn'); button.innerHTML = "copy"; }, 1000);
+	  document.getElementById('CBR').click();
+
+	})
+  }
   };
 
   
