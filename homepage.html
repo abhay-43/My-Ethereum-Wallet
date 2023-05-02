@@ -57,12 +57,55 @@
             <div class="col-md-6">
                 <div class="card my-4">
                     <div class="container mx-4 my-auto">
-                         <button class="btn-primary col-sm-2">Send</button>
-                         <button class="btn-primary col-sm-2">Receive</button>
-                         <button class="btn-primary col-sm-2">Stake</button>
+                        <hr color="black">
+                        <span class="row">
+                            <h4 class=" col-sm-5"><b>Send Ethers :</b></h4>
+                             <button class="btn btn-danger col-sm-3">Send</button>
+                        </span>
+                         <hr color="black">
+                         <span class="row">
+                             <h4 class=" col-sm-5"><b>Receive Ethers :</b></h4>
+                              <button class="btn btn-success col-sm-3"  data-bs-toggle="modal"
+                              data-bs-target="#receiveModal">Receive</button>
+                         </span>
+                         <hr color="black">
+                         <span class="row"> 
+                             <h4 class=" col-sm-5 "><b>Stake Ethers :</b></h4>
+                              <button class="btn btn-warning col-sm-3">Stake</button>
+                         </span>
+                         <hr color="black">
+                          <!-- Receive Modal -->
+                          <div class="modal fade" id="receiveModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                              <div class="modal-content logincard">
+                                <div class="modal-header">
+                                  <h1 class="modal-title fs-5" id="staticBackdropLabel">Receive Transaction :</h1>
+                                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                  <div class="mb-3 row">
+                                    <small><b>Your Wallet Address :</b></small>
+                                    <div class="col my-3">
+                                        <input type="text" readonly class="form-control" id="myaddress" value="0x4A0B6552F1D6fD37abE1d3882e58bdEa522f2942">
+                                    </div>
+                                    <div class="col-auto my-3">
+                                      <button type="submit" class="btn btn-primary " id="CopyButton">copy</button>
+                                    </div>
+                                    <div id="alert">
+                                        <small>⚠ Copy this address to receive ETH in your wallet.</small>
+                                    </div>
+                                </div>
+                                <div class="modal-footer ">
+                                  <button type="button" class="btn btn-danger" id="CBR" data-bs-dismiss="modal">Cancel</button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                    </div>
                     </div>
                 </div>
             </div>
+            
             <div class="col-md-6">
                 <div class="card my-4">
                        <div class="container mx-auto my-auto">
@@ -93,11 +136,15 @@
             </div>
         </div>
     </div>
+    
     <footer class="foot">
         <hr>
        <small>© 2020 Copyright: Design and created by Abhay Vishwakarma...</small>
        <hr>
       </footer>
+      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.9.3/umd/popper.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/js/bootstrap.min.js"></script>
   <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
   <script src="/js/index.js"></script>
 </body>
