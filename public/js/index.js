@@ -48,12 +48,25 @@ async function UpdateBalance(){
     const data = await response.json();
     const balance = await provider.getBalance(data.add);
     const EtherBalance = ethers.utils.formatEther(balance);
-    const ETHinUSD = EtherBalance * currPrice;
+    const ETH_USD = EtherBalance * currPrice;
+    const ETHinUSD = ETH_USD.toFixed(6);
     document.getElementById('balance').innerHTML = EtherBalance+' ETH ≈ $'+ETHinUSD;
   }catch(error){
     console.log(error);
   }
 }
+
+//view transaction function
+async function viewTransaction(){
+  try{
+    const response = await fetch('http://localhost:3000/mew_id');
+    const data = await response.json();
+    window.open('https://sepolia.etherscan.io/address/'+data.add, '_blank');
+  }catch(error){
+    console.log(error);
+  }
+}
+
 
 window.onload = async function() {
 
@@ -91,8 +104,9 @@ window.onload = async function() {
      if(localStorage.getItem('redirected') === 'true'){
       await getMew_ID();
       await getData();
-      await UpdateBalance()
+      await UpdateBalance();
       setInterval(getData,60000);
+      setInterval(UpdateBalance,70000);
      }
     
     //Redirect to connect page on disconnecting the wallet
@@ -103,7 +117,6 @@ window.onload = async function() {
         }
     })
     
-    
     // Copy to clipboard
     document.getElementById('CopyButton').onclick = function () {
 	    var text = document.getElementById('myaddress');
@@ -113,9 +126,11 @@ window.onload = async function() {
 	    button.innerHTML = "copied!";
 	    setTimeout(function () { button.classList.remove('cpybtn'); button.innerHTML = "copy"; }, 1000);
 	  document.getElementById('CBR').click();
+	})}
 
-	})
-  }
+  //view Transactions
+  document.getElementById('view').onclick = viewTransaction;
+
   };
 
   

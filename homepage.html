@@ -13,7 +13,7 @@
     <!-- navbar -->
     <nav class="navbar">
         <div class="container-fluid">
-            <h4><img src="/img/LOGO.png"  height="40" width="40"><b> Ethereum Wallet</b></h4>
+            <h4><img src="/img/LOGO.png"  height="40" width="40"><b> My-Ethereum-Wallet</b></h4>
             <button class="btn btn-success" id="disCntBtn" >Connected</button>
         </div>
     </nav>
@@ -56,11 +56,41 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="card my-4">
+                       <div class="container mx-auto my-auto">
+                            <h6 style="color:red"><u>Last Transactions :</u></h6>
+                                <hr color="black">
+                                <div class="container">
+                                    <div class="container row">
+                                        <b class="col-md-3">Address :</b>
+                                        <small class="col">0x4A0B6552F1D6fD37abE1d3882e58bdEa522f2942</small>
+                                    </div>
+                                    <div class="container row">
+                                        <b class="col-md-3">Amount :</b>
+                                        <small class="col">+0.003 ETH</small>
+                                    </div>
+                                    <hr color="black">
+                                    <div class="container row">
+                                        <b class="col-md-3">Address :</b>
+                                        <small class="col">0x4A0B6552F1D6fD37abE1d3882e58bdEa522f2942</small>
+                                    </div>
+                                    <div class="container row">
+                                        <b class="col-md-3">Amount :</b>
+                                        <small class="col">+0.003 ETH</small>
+                                    </div>
+                                </div>
+                                <hr color="black">                               
+                       </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card my-4">
                     <div class="container mx-4 my-auto">
                         <hr color="black">
                         <span class="row">
                             <h4 class=" col-sm-5"><b>Send Ethers :</b></h4>
-                             <button class="btn btn-danger col-sm-3">Send</button>
+                             <button class="btn btn-danger col-sm-3"  data-bs-toggle="modal"
+                             data-bs-target="#sendModal">Send</button>
                         </span>
                          <hr color="black">
                          <span class="row">
@@ -70,11 +100,54 @@
                          </span>
                          <hr color="black">
                          <span class="row"> 
-                             <h4 class=" col-sm-5 "><b>Stake Ethers :</b></h4>
-                              <button class="btn btn-warning col-sm-3">Stake</button>
+                             <h4 class=" col-sm-5 "><b>Transactions :</b></h4>
+                              <button class="btn btn-warning col-sm-3" id="view">View</button>
                          </span>
-                         <hr color="black">
-                          <!-- Receive Modal -->
+                         <hr color="black">  
+                       
+                         <!-- Send Modal -->
+                         <div class="modal fade" id="sendModal" data-bs-backdrop="static" data-bs-keyboard="false"
+                         tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                         <div class="modal-dialog">
+                             <div class="modal-content logincard">
+                                 <div class="modal-header">
+                                     <h1 class="modal-title fs-5" id="staticBackdropLabel">Send Transaction :
+                                     </h1>
+                                     <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                         aria-label="Close"></button>
+                                 </div>
+                                 <div class="modal-body">
+                                     <div class="mb-3 row">
+                                        <form method="post" action="/send">
+                                         <label for="inputPassword"
+                                             class="col-sm-2 col-form-label"><b>Address</b></label>
+                                         <div class="col-sm-10">
+                                             <input type="text" class="form-control" name="toAddress" value="">
+                                         </div>
+                                         <div id="alert">
+                                             <small>⚠ Please recheck the address of ERC20 network , otherwise
+                                                 there is a possibility of losing your assets.</small>
+                                         </div>
+                                     </div>
+                                     <div class="mb-3 row">
+                                         <label for="inputPassword" class="col-sm-4 col-form-label"><b>Amount (in
+                                                 ETH)</b></label>
+                                         <div class="col-sm-5">
+                                             <input type="text" class="form-control" name="amount" value="">
+                                         </div>
+                                     </div>
+                                 </div>
+                                 <div class="modal-footer ">
+                                     <button type="button" class="btn btn-danger" id="CBS" data-bs-dismiss="modal">Cancel</button>
+                                     <button type="submit" class="btn btn-success" id="SendBtn">Send</button>
+                                    </form>
+                                 </div>
+                             </div>
+                            </div>
+                         </div>
+
+
+                         <!-- Receive Modal -->
                           <div class="modal fade" id="receiveModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
                             <div class="modal-dialog">
                               <div class="modal-content logincard">
@@ -105,41 +178,12 @@
                     </div>
                 </div>
             </div>
-            
-            <div class="col-md-6">
-                <div class="card my-4">
-                       <div class="container mx-auto my-auto">
-                            <h6 style="color:red"><u>Last Transactions :</u></h6>
-                                <hr color="black">
-                                <div class="container">
-                                    <div class="container row">
-                                        <b class="col-md-3">Address :</b>
-                                        <small class="col">0x4A0B6552F1D6fD37abE1d3882e58bdEa522f2942</small>
-                                    </div>
-                                    <div class="container row">
-                                        <b class="col-md-3">Amount :</b>
-                                        <small class="col">+0.003 ETH</small>
-                                    </div>
-                                    <hr color="black">
-                                    <div class="container row">
-                                        <b class="col-md-3">Address :</b>
-                                        <small class="col">0x4A0B6552F1D6fD37abE1d3882e58bdEa522f2942</small>
-                                    </div>
-                                    <div class="container row">
-                                        <b class="col-md-3">Amount :</b>
-                                        <small class="col">+0.003 ETH</small>
-                                    </div>
-                                </div>
-                                <hr color="black">                               
-                       </div>
-                </div>
-            </div>
         </div>
     </div>
     
     <footer class="foot">
         <hr>
-       <small>© 2020 Copyright: Design and created by Abhay Vishwakarma...</small>
+       <small>© 2023 Copyright: Design and created by Abhay Vishwakarma...</small>
        <hr>
       </footer>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

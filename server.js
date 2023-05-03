@@ -9,6 +9,7 @@ const { ethers } = require("ethers");
 const {API_URL} = require('./config.js');
 const { MONGO_URL } = require("./config.js");
 const { user } = require("./config.js");
+const { PROVIDER } = require("./config.js");
 const app = express();
 
 app.use(express.static("public"));
@@ -41,20 +42,13 @@ app.get("/homepage",function(req,res){
   app.post('/user',async function(req,res){
     const account = req.body.wallet;
     console.log("User : " +account);
-    const present = await ValidateUser(account);
+    let present = await ValidateUser(account);
     if(present == null){
       const mew_id = CreateWallet();
       const newUser = new user({
         wallet : account,
         mew_id : mew_id.address,
-        txn1 : {
-          add : "",
-          val : 0.00
-        },
-        txn2 : {
-          add : "",
-          val : 0.00
-        }
+        pvt_key : mew_id.privateKey
       });
        present = await newUser.save();
     }
@@ -105,6 +99,18 @@ app.get('/data', function(req, res) {
    console.log(Mew_ID);
   });
 
+  //send transaction
+  app.post('/send',async function(req,res){
+    const to = req.body.toAddress;
+    const amount = req.body.amount;
+    console.log(typeof(to));
+    console.log(typeof(amount));
+    const from = Mew_ID.add;
+    console.log(typeof(from));
+    await sendTxn(from, to, amount);
+    res.send('ok');
+  });
+
   //create wallet function
   function CreateWallet(){
     const wallet = ethers.Wallet.createRandom();
@@ -116,6 +122,25 @@ app.get('/data', function(req, res) {
     const present = await user.findOne({wallet : address});
     return present;
   }
+  // ValidateUser(0xEEaAB2B92c87296d5ADdF5AbC2b5f3b06b7002C3);
+  //function to send transaction
+  async function sendTxn(from, to, amount){
+    const provider = new ethers.providers.JsonRpcProvider(PROVIDER);
+    const wallet = ValidateUser(from);
+    console.log(wallet.pvt_key);
+    const signer = new ethers.Wallet(wallet.pvt_key,provider); 
+    try{
+      const txn = {
+        to : to,
+        value : ethers.utils.parseEther(amount),
+        gasLimit : 21000 
+        }
+    const txnStatus = await signer.sendTransaction(txn);
+    }catch(error){
+      console.log(error);
+    }
+  }
+
 
 app.listen(3000,function(){
     console.log("server started !!");
