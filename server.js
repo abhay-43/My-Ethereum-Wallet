@@ -103,12 +103,18 @@ app.get('/data', function(req, res) {
   app.post('/send',async function(req,res){
     const to = req.body.toAddress;
     const amount = req.body.amount;
-    console.log(typeof(to));
-    console.log(typeof(amount));
-    const from = Mew_ID.add;
-    console.log(typeof(from));
-    await sendTxn(from, to, amount);
-    res.send('ok');
+    try{
+      const from = Mew_ID.add;
+      const txn = await sendTxn(from, to, amount);
+      console.log("Txn done");
+      if(txn.hash == undefined){
+        res.send("Transaction rejected due to " +txn.reason+".");
+      }else{
+        res.send("Transaction done with Txn hash: "+txn.hash);
+      }
+    }catch(error){
+      res.send("Transaction cannot be done without connecting wallet!");
+    }
   });
 
   //create wallet function
@@ -122,12 +128,11 @@ app.get('/data', function(req, res) {
     const present = await user.findOne({wallet : address});
     return present;
   }
-  // ValidateUser(0xEEaAB2B92c87296d5ADdF5AbC2b5f3b06b7002C3);
+ 
   //function to send transaction
   async function sendTxn(from, to, amount){
     const provider = new ethers.providers.JsonRpcProvider(PROVIDER);
-    const wallet = ValidateUser(from);
-    console.log(wallet.pvt_key);
+    const wallet = await user.findOne({mew_id : from});
     const signer = new ethers.Wallet(wallet.pvt_key,provider); 
     try{
       const txn = {
@@ -136,8 +141,10 @@ app.get('/data', function(req, res) {
         gasLimit : 21000 
         }
     const txnStatus = await signer.sendTransaction(txn);
+    return txnStatus;
     }catch(error){
       console.log(error);
+      return error;
     }
   }
 
