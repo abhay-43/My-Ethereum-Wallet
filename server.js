@@ -131,6 +131,7 @@ app.get('/data', function(req, res) {
 
     //Transaction update 
   app.get('/txn-update',function(req,res){
+    res.setHeader('Content-Type', 'application/json');
     res.send(txnUpdate);
   });
 
