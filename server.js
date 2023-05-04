@@ -103,18 +103,37 @@ app.get('/data', function(req, res) {
   app.post('/send',async function(req,res){
     const to = req.body.toAddress;
     const amount = req.body.amount;
+    let txnUpdate;
     try{
       const from = Mew_ID.add;
       const txn = await sendTxn(from, to, amount);
       console.log("Txn done");
       if(txn.hash == undefined){
-        res.send("Transaction rejected due to " +txn.reason+".");
+        // res.send("Transaction rejected due to " +txn.reason+".");
+        txnUpdate = {
+          type : 0,
+          update : txn.reason
+        }
       }else{
-        res.send("Transaction done with Txn hash: "+txn.hash);
+        // res.send("Transaction done with Txn hash: "+txn.hash);
+        txnUpdate = {
+          type : 1,
+          update : txn.hash
+        }
       }
     }catch(error){
-      res.send("Transaction cannot be done without connecting wallet!");
+      // res.send("Transaction cannot be done without connecting wallet!");
+      txnUpdate = {
+        type : -1,
+        update : "Transaction cannot be done without connecting wallet!"
+      }
     }
+
+    //Transaction update 
+  app.get('/txn-update',function(req,res){
+    res.send(txnUpdate);
+  });
+
   });
 
   //create wallet function
@@ -147,7 +166,6 @@ app.get('/data', function(req, res) {
       return error;
     }
   }
-
 
 app.listen(3000,function(){
     console.log("server started !!");

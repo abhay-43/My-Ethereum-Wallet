@@ -48,9 +48,10 @@ async function UpdateBalance(){
     const data = await response.json();
     const balance = await provider.getBalance(data.add);
     const EtherBalance = ethers.utils.formatEther(balance);
+    const Ether = (EtherBalance*1).toFixed(8);
     const ETH_USD = EtherBalance * currPrice;
-    const ETHinUSD = ETH_USD.toFixed(6);
-    document.getElementById('balance').innerHTML = EtherBalance+' ETH ≈ $'+ETHinUSD;
+    const ETHinUSD = ETH_USD.toFixed(4);
+    document.getElementById('balance').innerHTML = Ether+' ETH ≈ $'+ETHinUSD;
   }catch(error){
     console.log(error);
   }
@@ -62,6 +63,41 @@ async function viewTransaction(){
     const response = await fetch('http://localhost:3000/mew_id');
     const data = await response.json();
     window.open('https://sepolia.etherscan.io/address/'+data.add, '_blank');
+  }catch(error){
+    console.log(error);
+  }
+}
+
+//fetching transaction update
+async function TxnUpdate(){
+  try{
+    const response = await fetch('http://localhost:3000/txn-update');
+    const data = await response.json();
+    if(data.type == 0){
+      var click = alert("Transaction rejected! \n Reason: "+data.update);
+      if(!click){
+        location.reload();
+      }
+    }
+    else if(data.type == 1){
+      var click = alert("Transaction done! \n TxnHash: "+data.update);
+      if(!click){
+        location.reload();
+      }
+    }
+    else if(data.type == -1){
+      var click = alert(data.update);
+      if(!click){
+        location.reload();
+      }
+    }
+    else{
+      var click = alert("Unknown Error Occured!");
+      if(!click){
+        location.reload();
+      }
+      
+    }
   }catch(error){
     console.log(error);
   }
@@ -97,7 +133,11 @@ window.onload = async function() {
 
     //disconnect wallet hint 
     document.getElementById('disCntBtn').onclick = function (){
-      alert('You can manually disconnect your wallet !\n\nFollow steps :\n\n Open metamask -> Tap "connected" -> Tap three dots (⋮) \n  -> Tap "Disconnect this account"');
+      var click= alert('You can manually disconnect your wallet !\n\nFollow steps :\n\n Open metamask -> Tap "connected" -> Tap three dots (⋮) \n  -> Tap "Disconnect this account"');
+      if(click){}
+      else{
+        location.reload();
+      }
     } 
 
     //updating data of ETH
@@ -130,6 +170,13 @@ window.onload = async function() {
 
   //view Transactions
   document.getElementById('view').onclick = viewTransaction;
+
+  //Transaction alert
+  document.getElementById('SendBtn').onclick = async function(){
+    document.getElementById('CBS').click();
+    setTimeout(function(){alert('Transaction intiated ! \n Click "OK" and wait for confirmation.')},2000);
+    setTimeout(TxnUpdate,10000);
+  };
 
   };
 
