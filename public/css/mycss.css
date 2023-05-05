@@ -90,3 +90,8 @@
         text-align: center;
        font-family: cursive;
     }
+    #title:hover::before{
+        content : " My-Ethereum-Wallet";
+        /* visibility: hidden; */
+    }
+    

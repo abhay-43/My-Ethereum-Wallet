@@ -145,8 +145,11 @@ window.onload = async function() {
       await getMew_ID();
       await getData();
       await UpdateBalance();
-      setInterval(getData,60000);
-      setInterval(UpdateBalance,70000);
+      setInterval(async function(){
+        await getData();
+         await UpdateBalance(); 
+      },60000);
+      
      }
     
     //Redirect to connect page on disconnecting the wallet
@@ -174,8 +177,10 @@ window.onload = async function() {
   //Transaction alert
   document.getElementById('SendBtn').onclick = async function(){
     document.getElementById('CBS').click();
-    setTimeout(function(){alert('Transaction intiated ! \n Click "OK" and wait for confirmation.')},2000);
-    setTimeout(TxnUpdate,10000);
+    setTimeout(function(){alert('Transaction intiated ! \n Click "OK" and wait for confirmation.')},500);
+    setTimeout(async function(){
+      await TxnUpdate();
+    },8000);
   };
 
   };

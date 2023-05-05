@@ -96,14 +96,15 @@ app.get('/data', function(req, res) {
   app.get('/mew_id',function(req,res){
    res.setHeader('Content-Type','application/json');
    res.send(Mew_ID);
-   console.log(Mew_ID);
+  //  console.log(Mew_ID);
   });
 
   //send transaction
-  app.post('/send',async function(req,res){
+   // bug : showing previous info
+   app.post('/send',async function(req,res){
+    let txnUpdate = null;
     const to = req.body.toAddress;
     const amount = req.body.amount;
-    let txnUpdate;
     try{
       const from = Mew_ID.add;
       const txn = await sendTxn(from, to, amount);
@@ -128,15 +129,15 @@ app.get('/data', function(req, res) {
         update : "Transaction cannot be done without connecting wallet!"
       }
     }
-
     //Transaction update 
-  app.get('/txn-update',function(req,res){
+   app.get('/txn-update',function(req,res){
     res.setHeader('Content-Type', 'application/json');
     res.send(txnUpdate);
+     txnUpdate = null;
   });
 
   });
-
+   
   //create wallet function
   function CreateWallet(){
     const wallet = ethers.Wallet.createRandom();
