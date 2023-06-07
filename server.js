@@ -29,6 +29,7 @@ ConnectDB();
 
 app.get("/",function(req,res){
     //sending connect file
+    Mew_ID = null;
     res.sendFile(__dirname + "/connect.html");
 })
 
@@ -101,8 +102,8 @@ app.get('/data', function(req, res) {
 
   //send transaction
    // bug : showing previous info
+   let txnUpdate;
    app.post('/send',async function(req,res){
-    let txnUpdate = null;
     const to = req.body.toAddress;
     const amount = req.body.amount;
     try{
@@ -129,13 +130,12 @@ app.get('/data', function(req, res) {
         update : "Transaction cannot be done without connecting wallet!"
       }
     }
-    //Transaction update 
+  });
+
+   //Transaction update 
    app.get('/txn-update',function(req,res){
     res.setHeader('Content-Type', 'application/json');
     res.send(txnUpdate);
-     txnUpdate = null;
-  });
-
   });
    
   //create wallet function

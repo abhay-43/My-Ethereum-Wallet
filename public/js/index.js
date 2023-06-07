@@ -5,7 +5,26 @@ const signer = provider.getSigner();
 let currPrice;
 
 
-
+//connect button action
+async function connect(){
+  await provider.send("eth_requestAccounts",[]);
+  // const signer = provider.getSigner();
+  const walletAddress = await signer.getAddress();
+  console.log(walletAddress);
+  const data = {
+    wallet : walletAddress
+  }
+  localStorage.setItem('redirected',true);
+  const response = await fetch("http://localhost:3000/user",{
+      method : 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+      await response.text();
+      window.location.replace("/homepage");
+}
 
 //fetching json from server
 async function getData() {
@@ -35,6 +54,7 @@ async function getMew_ID() {
   try{
     const response = await fetch('http://localhost:3000/mew_id');
     const data = await response.json();
+    document.getElementById('disCntBtn').textContent = "Connected";
     document.getElementById('myaddress').value = data.add;
     }catch(error){
       console.log(error);
@@ -98,10 +118,12 @@ async function TxnUpdate(){
       }
       
     }
+    console.log("hello");
   }catch(error){
     console.log(error);
   }
 }
+
 
 
 window.onload = async function() {
@@ -110,35 +132,21 @@ window.onload = async function() {
     // const provider = new ethers.providers.Web3Provider(window.ethereum);
     const cntBtn = document.getElementById('CntBtn');
     if (cntBtn) {
-      cntBtn.onclick = async function(){
-        await provider.send("eth_requestAccounts",[]);
-        // const signer = provider.getSigner();
-        const walletAddress = await signer.getAddress();
-        console.log(walletAddress);
-        const data = {
-          wallet : walletAddress
-        }
-        localStorage.setItem('redirected',true);
-        const response = await fetch("http://localhost:3000/user",{
-            method : 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-          });
-            await response.text();
-            window.location.replace("/homepage");
-      }
+      cntBtn.onclick = connect;
     }
 
     //disconnect wallet hint 
+   if( document.getElementById('disCntBtn').textContent == "Connected"){
     document.getElementById('disCntBtn').onclick = function (){
       var click= alert('You can manually disconnect your wallet !\n\nFollow steps :\n\n Open metamask -> Tap "connected" -> Tap three dots (⋮) \n  -> Tap "Disconnect this account"');
       if(click){}
       else{
         location.reload();
       }
-    } 
+    }
+  }else{
+    document.getElementById('disCntBtn').onclick = connect;
+  } 
 
     //updating data of ETH
      if(localStorage.getItem('redirected') === 'true'){
@@ -177,10 +185,10 @@ window.onload = async function() {
   //Transaction alert
   document.getElementById('SendBtn').onclick = async function(){
     document.getElementById('CBS').click();
-    setTimeout(function(){alert('Transaction intiated ! \n Click "OK" and wait for confirmation.')},500);
-    setTimeout(async function(){
-      await TxnUpdate();
-    },8000);
+    // setTimeout(function(){alert('Transaction intiated ! \n Click "OK" and wait for confirmation.')},500);
+    setInterval( async function(){
+     await TxnUpdate();
+    },20000);
   };
 
   };
