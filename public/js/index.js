@@ -54,7 +54,7 @@ async function getMew_ID() {
   try{
     const response = await fetch('http://localhost:3000/mew_id');
     const data = await response.json();
-    document.getElementById('disCntBtn').textContent = "Connected";
+    document.getElementById('disCntBtn').textContent = "Account";
     document.getElementById('myaddress').value = data.add;
     }catch(error){
       console.log(error);

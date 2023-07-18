@@ -1,15 +1,19 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-    wallet : {
-        type : String,
-        required : true
-    },
     mew_id : {
         type : String,
         required : true
     },
+    wallet : {
+        type : String,
+        required : true
+    },
     pvt_key : {
+        type : String,
+        required : true
+    },
+    mnemonic : {
         type : String,
         required : true
     }
