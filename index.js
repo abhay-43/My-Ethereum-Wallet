@@ -10,11 +10,15 @@ const {API_URL} = require('./config.js');
 const { MONGO_URL } = require("./config.js");
 const { user } = require("./config.js");
 const { PROVIDER } = require("./config.js");
+const { KEY, iv } = require("./config.js");
 const app = express();
 
 app.use(express.static("public"));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+const encryptionKey = Buffer.from(KEY,'utf-8');
+const IV = Buffer.from(iv,'utf-8'); // Create an initialization vector (IV) for additional security (16 bytes for AES-256)
+
 
 //connect to database
 async function ConnectDB(){
@@ -169,6 +173,27 @@ app.get('/data', function(req, res) {
     }
   }
 
+  //function for encryption
+   function encryptData (data){
+      // Create a cipher using AES-256-CBC algorithm
+      const cipher = crypto.createCipheriv('aes-256-cbc', encryptionKey, iv);
+      // Encrypt the data
+      let encryptedData = cipher.update(data, 'utf-8', 'hex');
+      encryptedData += cipher.final('hex');
+      return encryptedData;
+   }
+
+  //function for decryption
+   function decryptData (data){
+      // To decrypt the data
+      const decipher = crypto.createDecipheriv('aes-256-cbc', encryptionKey, iv);
+      // Decrypt the data
+      let decryptedData = decipher.update(data, 'hex', 'utf-8');
+      decryptedData += decipher.final('utf-8');
+      return decryptedData;
+  }
+
+
 app.post('/verify', async function(req,res){
   const mew_id = req.body.mew_id;
   try{
@@ -178,7 +203,8 @@ app.post('/verify', async function(req,res){
     }else{
       const Wallet = CreateWallet();
       const wallet = Wallet.address;
-      const pvt_key = 
+      const pvt_key = encryptData(Wallet.privateKey);
+      const mnemonic = encryptData(Wallet.mnemonic.phrase);
     }
   }catch(error){
     console.log(error);
