@@ -169,6 +169,22 @@ app.get('/data', function(req, res) {
     }
   }
 
+app.post('/verify', async function(req,res){
+  const mew_id = req.body.mew_id;
+  try{
+    const available = await user.findOne({mew_id : mew_id});
+    if(available){
+
+    }else{
+      const Wallet = CreateWallet();
+      const wallet = Wallet.address;
+      const pvt_key = 
+    }
+  }catch(error){
+    console.log(error);
+  }
+})
+
 app.listen(3000,function(){
     console.log("server started !!");
 });
