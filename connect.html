@@ -28,19 +28,22 @@
             <div class="top my-4 mx-4"><h1>Welcome to Ethereum Wallet</h1></div>
             <div class="center mx-4">
                 <h6><b>Create new wallet :</b></h6>
-               <form class="d-flex">
-                <input class="form-control me-2"  placeholder="unique #mew_id" >
+               <span class="d-flex">
+                <input class="form-control me-2"  placeholder="unique #mew_id" id="newWallet" required="true" >
                 <button class="btn btn-outline-primary" id="createWallet">Create</button>
-               </form>
+               </span>
                <h5 class="mt-2 mb-3"><b>OR</b></h5>
                <h6><b>Login to wallet :</b></h6>
-               <form class="d-flex">
-                <input class="form-control me-2"  placeholder="your #mew_id" >
-                <button class="btn btn-outline-primary" id="loginWallet">Login</button>
-               </form>
+               <span class="d-flex">
+                <input class="form-control me-2"  placeholder="your #mew_id" id="oldWallet" required="false" >
+                <button class="btn btn-outline-primary" id="loginWallet" >Login</button>
+            </span>
             </div>
         </div>
     </div>
+    <!-- modal start here  -->
+    
+    <!-- modal end here  -->
 
 <footer class="foot">
     <hr>
